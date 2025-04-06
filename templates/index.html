@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Serene AI</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>🌿 Serene AI</h1>
+    <div id="chatbox" class="chatbox"></div>
+    <div class="input-area">
+      <input type="text" id="userInput" placeholder="How are you feeling?" onkeydown="if(event.key==='Enter') sendMessage()">
+      <button onclick="sendMessage()">Send</button>
+    </div>
+  </div>
+
+  <script>
+    function detectMoodEmoji(text) {
+      text = text.toLowerCase();
+      if (text.includes("sad") || text.includes("down") || text.includes("cry")) return "😢";
+      if (text.includes("happy") || text.includes("great") || text.includes("excited")) return "😊";
+      if (text.includes("angry") || text.includes("mad")) return "😠";
+      if (text.includes("anxious") || text.includes("nervous")) return "😰";
+      if (text.includes("tired") || text.includes("lazy")) return "😴";
+      return "💬";
+    }
+
+    function sendMessage() {
+      let input = document.getElementById('userInput');
+      let message = input.value.trim();
+      if (message === "") return;
+
+      let emoji = detectMoodEmoji(message);
+      let chatbox = document.getElementById('chatbox');
+      chatbox.innerHTML += `<div class="message user">${emoji} ${message}</div>`;
+      input.value = "";
+
+      fetch("/get_response", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: message })
+      })
+      .then(res => res.json())
+      .then(data => {
+        chatbox.innerHTML += `<div class="message bot">${data.reply}</div>`;
+        chatbox.scrollTop = chatbox.scrollHeight;
+      });
+    }
+  </script>
+</body>
+</html>
